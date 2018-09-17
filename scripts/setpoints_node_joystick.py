@@ -103,7 +103,7 @@ class Controller:
         # Fence. We will assume a square fence for now
         self.FENCE_LIMIT_X = 2.0
         self.FENCE_LIMIT_Y = 3.0
-        self.FENCE_LIMIT_Z_DOWN = 0.35
+        self.FENCE_LIMIT_Z_DOWN = 0.25
         self.FENCE_LIMIT_Z_UP = self.ALT_SP
 
         # A Message for the current local position of the drone
@@ -159,8 +159,8 @@ class Controller:
     	if not (len(self.joy_msg.axes)>0 and len(self.joy_msg.buttons )>0 ):
     		return
 
-        x = 1.0*self.joy_msg.axes[2]
-        y = 1.0*self.joy_msg.axes[3]
+        x = 1.0*self.joy_msg.axes[3]
+        y = 1.0*self.joy_msg.axes[2]
         z = self.joy_msg.axes[1]
       
         #self.sp.position.x = self.local_pos.x + self.STEP_SIZE*x
