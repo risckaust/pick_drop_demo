@@ -156,6 +156,9 @@ class Controller:
 
     ## Update setpoint message
     def updateSp(self):
+    	if not (len(self.joy_msg.axes)>0 and len(self.joy_msg.buttons )>0 ):
+    		return
+
         x = 1.0*self.joy_msg.axes[2]
         y = 1.0*self.joy_msg.axes[3]
         z = self.joy_msg.axes[1]
