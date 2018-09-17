@@ -28,7 +28,7 @@ ros::NodeHandle nh;
 
 // callback
 void MsgCb( const sensor_msgs::Joy& msg){
-  if (msg.buttons[8] > 0){
+  if (msg.axes[5] < 0){
     nh.loginfo("Button 9 was clicked");
     if (buttonState == LOW){                      // check if the pushbutton is not pressed.
       nh.loginfo("Motors are moving to drop");
@@ -64,4 +64,3 @@ void loop(){
   if (buttonState == LOW)                      // check if the pushbutton is not pressed.
     nh.loginfo("Drop to pick-up again");
 } 
-

@@ -128,39 +128,37 @@ class Controller:
         self.local_pos.y = msg.pose.position.y
         self.local_pos.z = msg.pose.position.z
 
-    ## joystick callback
-    def joyCb(self, msg):
-        self.joy_msg = msg
-
     ## Drone State callback
     def stateCb(self, msg):
         self.state = msg
 
         ## joystick callback
     def joyCb(self, msg):
-			self.joy_msg = msg
+		self.joy_msg = msg
 
-			# If button 1 on joystick is pressed
-			if msg.buttons[0] > 0:
-				self.modes.setArm()
+		# If button 'Start' on joystick is pressed
+		if msg.buttons[9] > 0:
+			self.modes.setArm()
+			self.sp.position.x = self.local_pos.x
+			self.sp.position.y = self.local_pos.y
+			self.sp.position.z = self.ALT_SP
+			self.modes.setOffboardMode()
 
-			# If button 2 on joystick is pressed
-			if msg.buttons[1] > 0:
-				self.modes.setAutoLandMode()
 
-			# If button 3 on joystick is pressed
-			if msg.buttons[2] > 0:
-				self.modes.setOffboardMode()
 
-			# If button 11 on joystick is pressed
-			if msg.buttons[10] > 0:
-				self.modes.setDisarm()
+		# If button 'A' on joystick is pressed
+		if msg.buttons[1] > 0:
+			self.modes.setAutoLandMode()
+
+		# If button 'B' on joystick is pressed
+		if msg.buttons[2] > 0:
+			self.modes.setDisarm()
 
     ## Update setpoint message
     def updateSp(self):
-        x = 1.0*self.joy_msg.axes[1]
-        y = 1.0*self.joy_msg.axes[0]
-        z = self.joy_msg.axes[2]
+        x = 1.0*self.joy_msg.axes[2]
+        y = 1.0*self.joy_msg.axes[3]
+        z = self.joy_msg.axes[1]
       
         #self.sp.position.x = self.local_pos.x + self.STEP_SIZE*x
         #self.sp.position.y = self.local_pos.y + self.STEP_SIZE*y
