@@ -1,5 +1,5 @@
 # pick_drop_demo
-This package can be used to demonstrate object transportation using a drone in an indoor setup. The constrol can be either a human pilot which controls the drone using a joystick to fly the drone, pick, transport and drop the object, or fully autonomous using vision feedback.
+This package can be used to demonstrate object transportation using a drone in an indoor setup. The control can be either via a human pilot who controls the drone using a joystick to fly the drone, pick, transport and drop the object, or fully autonomous using vision feedback.
 
 The following setup is assumed.
 
