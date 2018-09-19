@@ -261,106 +261,111 @@ def main():
 
     # ROS main loop
     while not rospy.is_shutdown():
-    	if cnt.TAKEOFF:
-		rospy.loginfo("TAKEOFF state")
-    		if abs(cnt.local_pos.z - cnt.ALT_SP) < 0.1:
-    			cnt.resetStates()
-    			cnt.SEARCH = 1
-    			search_t = time.time()
+        if cnt.TAKEOFF:
+            rospy.loginfo("TAKEOFF state")
+            if abs(cnt.local_pos.z - cnt.ALT_SP) < 0.1:
+                cnt.resetStates()
+                cnt.SEARCH = 1
+                search_t = time.time()
 
-		if cnt.SEARCH:
-			rospy.loginfo("SEARCH state")
-			cnt.IS_OBJECT_DETECTED = False
-			cnt.sp.position.x = cnt.SEARCH_POINT_X
-			cnt.sp.position.y = cnt.SEARCH_POINT_Y
+        if cnt.SEARCH:
+            rospy.loginfo("SEARCH state")
+            cnt.IS_OBJECT_DETECTED = False
+            cnt.sp.position.x = cnt.SEARCH_POINT_X
+            cnt.sp.position.y = cnt.SEARCH_POINT_Y
 
-			# TODO: find object in tf tree
-			try:
-        			(trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
-        			cnt.IS_OBJECT_DETECTED = True
-    			except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-    				cnt.IS_OBJECT_DETECTED = False
-        			#continue
+            # TODO: find object in tf tree
+            try:
+                (trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
+                cnt.IS_OBJECT_DETECTED = True
+            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                cnt.IS_OBJECT_DETECTED = False
 
-			# check distance to point
-			err = (cnt.sp.position.x - cnt.SEARCH_POINT_X)**2 + (cnt.sp.position.y - cnt.SEARCH_POINT_Y)**2
-			# Take square root
-			err = err**0.5
-			if err < 0.05 and cnt.IS_OBJECT_DETECTED:
-				cnt.resetStates()
-				cnt.PICK = 1
-				# start picking duration
-				pick_t = time.time()
+            # check distance to point
+            err = (cnt.sp.position.x - cnt.SEARCH_POINT_X)**2 + (cnt.sp.position.y - cnt.SEARCH_POINT_Y)**2
+            # Take square root
+            err = err**0.5
+            if err < 0.05 and cnt.IS_OBJECT_DETECTED:
+                cnt.resetStates()
+                cnt.PICK = 1
+                # start picking duration
+                pick_t = time.time()
 
-			# if search time exceeded with no detection, go to land state
-			if (time.time() - search_t) > 10.0:
-				cnt.resetStates()
-				cnt.PRE_LAND = 1
-
+            # if search time exceeded with no detection, go to land state
+            if (time.time() - search_t) > 10.0:
+                cnt.resetStates()
+                cnt.PRE_LAND = 1
 
 
 
-		if cnt.PICK:
 
-			cnt.sp.position.x = trans[0]
-			cnt.sp.position.y = trans[1]
-			cnt.sp.position.z = trans[2]
+        if cnt.PICK:
+            rospy.loginfo("PICK state")
 
-			# in case of re-pick
-			if RE_PICK:
-				cnt.sp.position.z = cnt.ALT_SP
-				if abs(cnt.local_pos.z - cnt.ALT_SP) < 0.1:
-					RE_PICK = 0
+            cnt.sp.position.x = trans[0]
+            cnt.sp.position.y = trans[1]
+            cnt.sp.position.z = trans[2]
 
-			if cnt.IS_OBJECT_PICKED:
-				cnt.resetStates()
-				cnt.DROPPOINT = 1
+            # in case of re-pick
+            if RE_PICK:
+            	rospy.loginfo("RE-PICK state")
+                cnt.sp.position.z = cnt.ALT_SP
+                if abs(cnt.local_pos.z - cnt.ALT_SP) < 0.1:
+                    RE_PICK = 0
 
-			if (time.time() - pick_t) > 5.0 and not cnt.IS_OBJECT_PICKED and not RE_PICK:
-				RE_PICK = 1
-				pick_t = time.time()
-				PICK_TRIAL  = PICK_TRIAL + 1
+            if cnt.IS_OBJECT_PICKED:
+                cnt.resetStates()
+                cnt.DROPPOINT = 1
 
-			# In case picking has failed, go to land state
-			if PICK_TRIAL > MAX_PICK_TRIALS:
-				cnt.resetStates()
-				cnt.PRE_LAND = 1
+            if (time.time() - pick_t) > 5.0 and not cnt.IS_OBJECT_PICKED and not RE_PICK:
+                RE_PICK = 1
+                pick_t = time.time()
+                PICK_TRIAL  = PICK_TRIAL + 1
 
-		if cnt.DROPPOINT:
-			cnt.sp.position.x = cnt.DROP_POINT_X
-			cnt.sp.position.y = cnt.DROP_POINT_Y
-			cnt.sp.position.z = cnt.DROP_POINT_Z
+            # In case picking has failed, go to land state
+            if PICK_TRIAL > MAX_PICK_TRIALS:
+                cnt.resetStates()
+                cnt.PRE_LAND = 1
 
-			err = (cnt.local_pos.x - cnt.DROP_POINT_X)**2 + (cnt.local_pos.y - cnt.DROP_POINT_Y)**2
-			err = err**0.5
-			if err < 0.05:
-				cnt.resetStates()
-				cnt.DROP = 1
+        if cnt.DROPPOINT:
+            rospy.loginfo("DROPPOINT state")
+            cnt.sp.position.x = cnt.DROP_POINT_X
+            cnt.sp.position.y = cnt.DROP_POINT_Y
+            cnt.sp.position.z = cnt.DROP_POINT_Z
 
-		if cnt.DROP:
-			# TODO: publish apropriate Joy msg to send drop signal
-			joy_msg = Joy()
-			joy_pub.publish(joy_msg)
+            err = (cnt.local_pos.x - cnt.DROP_POINT_X)**2 + (cnt.local_pos.y - cnt.DROP_POINT_Y)**2
+            err = err**0.5
+            if err < 0.05:
+                cnt.resetStates()
+                cnt.DROP = 1
 
-			if not cnt.IS_OBJECT_PICKED:
-				cnt.resetStates()
-				cnt.PRE_LAND = 1
+        if cnt.DROP:
+            rospy.loginfo("DROP state")
+            # TODO: publish apropriate Joy msg to send drop signal
+            joy_msg = Joy()
+            joy_pub.publish(joy_msg)
 
-		if cnt.PRE_LAND:
-			cnt.sp.position.x = cnt.LAND_POINT_X
-			cnt.sp.position.Y = cnt.LAND_POINT_Y
-			cnt.sp.position.z = cnt.ALT_SP
+            if not cnt.IS_OBJECT_PICKED:
+                cnt.resetStates()
+                cnt.PRE_LAND = 1
 
-			err = (cnt.local_pos.x - cnt.LAND_POINT_X)**2 + (cnt.local_pos.y - cnt.LAND_POINT_Y)**2
-			err = err**0.5
+        if cnt.PRE_LAND:
+            rospy.loginfo("PRE-LAND state")
+            cnt.sp.position.x = cnt.LAND_POINT_X
+            cnt.sp.position.Y = cnt.LAND_POINT_Y
+            cnt.sp.position.z = cnt.ALT_SP
 
-			if err < 0.1:
-				cnt.resetStates()
-				cnt.LAND = 1
+            err = (cnt.local_pos.x - cnt.LAND_POINT_X)**2 + (cnt.local_pos.y - cnt.LAND_POINT_Y)**2
+            err = err**0.5
 
-		if cnt.LAND:
-			cnt.modes.setAutoLandMode()
-			break
+            if err < 0.1:
+                cnt.resetStates()
+                cnt.LAND = 1
+
+        if cnt.LAND:
+            rospy.loginfo("LAND state")
+            cnt.modes.setAutoLandMode()
+            break
 
 
         sp_pub.publish(cnt.sp)
