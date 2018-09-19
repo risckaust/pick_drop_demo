@@ -3,18 +3,24 @@
 # ROS python API
 import rospy
 import tf
+import time
 
-def main:
+def main():
 	# initiate node
-    rospy.init_node('tf_listner_test', anonymous=True)
-
+        rospy.init_node('tf_listner_test', anonymous=True)
+        listener = tf.TransformListener()
+        time.sleep(1)
+        #(trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
 	try:
+                t1 = time.time()
 		(trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
-		print trans
-		print rot
+                t = time.time()-t1
+                print "duration(s):" , t
+		print "Translation: ", trans
+		print "Rotation:", rot
 	except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
 		print "ERROR"
-		continue
+		
 
 if __name__ == '__main__':
     try:

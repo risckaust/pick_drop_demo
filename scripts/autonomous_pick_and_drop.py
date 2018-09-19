@@ -128,8 +128,8 @@ class Controller:
         self.DROP_ALT	= 0.25 # meter(s)
 
         # X/Y coordinates of search point where object is expected to be around
-        self.SEARCH_POINT_X = 0.0
-        self.SEARCH_POINT_Y = 0.0
+        self.SEARCH_POINT_X = 0.5
+        self.SEARCH_POINT_Y = -2.17
 
         # object position in local map
         # can be found from tf tree
@@ -140,13 +140,13 @@ class Controller:
         self.IS_OBJECT_DETECTED = False
 
         # Drop point coordinates
-        self.DROP_POINT_X = 0.0
-        self.DROP_POINT_Y = 0.0
+        self.DROP_POINT_X = -1.89
+        self.DROP_POINT_Y = -2.24
         self.DROP_POINT_Z = self.ALT_SP
 
         # Land point
-        self.LAND_POINT_X = 0.0
-        self.LAND_POINT_Y = 0.0
+        self.LAND_POINT_X = -0.46
+        self.LAND_POINT_Y = -2.25
 
     def resetStates(self):
     	self.TAKEOFF	= 0
@@ -262,23 +262,25 @@ def main():
     # ROS main loop
     while not rospy.is_shutdown():
     	if cnt.TAKEOFF:
+		rospy.loginfo("TAKEOFF state")
     		if abs(cnt.local_pos.z - cnt.ALT_SP) < 0.1:
     			cnt.resetStates()
     			cnt.SEARCH = 1
     			search_t = time.time()
 
 		if cnt.SEARCH:
+			rospy.loginfo("SEARCH state")
 			cnt.IS_OBJECT_DETECTED = False
 			cnt.sp.position.x = cnt.SEARCH_POINT_X
 			cnt.sp.position.y = cnt.SEARCH_POINT_Y
 
 			# TODO: find object in tf tree
 			try:
-        		(trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
-        		cnt.IS_OBJECT_DETECTED = True
-    		except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-    			cnt.IS_OBJECT_DETECTED = False
-        		continue
+        			(trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
+        			cnt.IS_OBJECT_DETECTED = True
+    			except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+    				cnt.IS_OBJECT_DETECTED = False
+        			#continue
 
 			# check distance to point
 			err = (cnt.sp.position.x - cnt.SEARCH_POINT_X)**2 + (cnt.sp.position.y - cnt.SEARCH_POINT_Y)**2
@@ -361,7 +363,6 @@ def main():
 			break
 
 
-        cnt.updateSp()
         sp_pub.publish(cnt.sp)
         rate.sleep()
 
