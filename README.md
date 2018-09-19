@@ -29,7 +29,7 @@ The following setup is assumed.
 * Example on how to relay it to mavros plugin: https://github.com/risckaust/pick_drop_demo/blob/master/launch/start_system.launch#L29
 * **NOTE** Always double check that you can hover the drone in **POSITION** flight mode, before you execute the experiments in **OFFBOARD** mode.
 
-## Manula control
+## Manual control
 * Adjust the rigidbody name in https://github.com/risckaust/pick_drop_demo/blob/master/launch/start_system.launch#L12
 * Adjust connection links in https://github.com/risckaust/pick_drop_demo/blob/master/launch/start_system.launch#L3-L10
 * Make sure that you give the joystick permissions (we used Logitech F710). The right stick is for x/y motion. The left stick is for height. The  red button is for disarm. The green button is for autoland. The down arrow is for dropping, if the object is picked (detected by the button on the gripper).
