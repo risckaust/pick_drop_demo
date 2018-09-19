@@ -292,7 +292,7 @@ def main():
                 pick_t = time.time()
 
             # if search time exceeded with no detection, go to land state
-            if (time.time() - search_t) > 10.0:
+            if (time.time() - search_t) > 30.0:
                 cnt.resetStates()
                 cnt.PRE_LAND = 1
 
@@ -352,7 +352,7 @@ def main():
         if cnt.PRE_LAND:
             rospy.loginfo("PRE-LAND state")
             cnt.sp.position.x = cnt.LAND_POINT_X
-            cnt.sp.position.Y = cnt.LAND_POINT_Y
+            cnt.sp.position.y = cnt.LAND_POINT_Y
             cnt.sp.position.z = cnt.ALT_SP
 
             err = (cnt.local_pos.x - cnt.LAND_POINT_X)**2 + (cnt.local_pos.y - cnt.LAND_POINT_Y)**2
