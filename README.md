@@ -4,8 +4,8 @@ This package can be used to demonstrate object transportation using a drone in a
 The following setup is assumed.
 
 * Indoor localization system (optitrack)
-* A drone that is equipped with a PX4 aut-pilot and an arduino controlled customized gripper.
-* An object that is magnetic
+* A drone that is equipped with a PX4 autopilot and an arduino-controlled customized gripper.
+* An object that is magnetic (can be picked by a permanent magnet)
 * A ROS-compatible joystick for manual control
 * A ROS-compatible camera for vision feedback, for autonomous mission
 * ROS Kinetic, Ubuntu 16 on ODROID XU4, or a similar onboard computer
@@ -22,7 +22,7 @@ The following setup is assumed.
 * The arduino code that controls the gripper is at  https://github.com/risckaust/pick_drop_demo/tree/master/gripper_joystick
 
 # Experiments
-* Place markers on the drone, and define a rigid body in *Motive*
+* Place markers rigidly on the drone, and define a rigid body in *Motive*
 * stream the rigid body info using VRPN, and make sure that **Up** axis is the **z-axis**
 * It is assumed that you have an onboard computer which runs [mavros](http://wiki.ros.org/mavros), which can be used to feed the rigidbody pose from motion capture information to PX4.
 * Example of how to get pose of a rigidbody from mocap to ROS: https://github.com/risckaust/pick_drop_demo/blob/master/launch/start_system.launch#L25-L27
