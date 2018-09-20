@@ -283,7 +283,13 @@ def main():
 
             # TODO: find object in tf tree
             try:
-                (trans,rot) = listener.lookupTransform('/map', '/disc', rospy.Time(0))
+            	x,y = 0., 0.
+            	for i in range(100):
+					(trans,rot) = listener.lookupTransform('/map', '/disc', rospy.Time(0))
+					x = x + trans[0]
+					y = y + trans[1]
+				trans[0] = x/100.
+				trans[1] = y/100.
                 cnt.IS_OBJECT_DETECTED = True
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 cnt.IS_OBJECT_DETECTED = False
@@ -309,8 +315,8 @@ def main():
         if cnt.PICK:
             rospy.loginfo("PICK state")
 
-            cnt.sp.position.x = trans[0]
-            cnt.sp.position.y = trans[1]
+            cnt.sp.position.x = trans[0] - 0.03
+            cnt.sp.position.y = trans[1] - 0.03
             cnt.sp.position.z = trans[2]
 
             # in case of re-pick
