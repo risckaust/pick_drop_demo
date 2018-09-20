@@ -137,6 +137,9 @@ class Controller:
         self.OBJ_POS_Y = 0.0
         self.OBJ_POS_Z = 0.0
 
+        # Object picking state
+        self.IS_OBJECT_PICKED = False
+
         self.IS_OBJECT_DETECTED = False
 
         # Drop point coordinates
@@ -180,8 +183,9 @@ class Controller:
 
     # object position callback
     # expecting only single object
-    def objCb(self, msg):
-    	pass
+    def gripperCb(self, msg):
+    	if msg is not None:
+    		self.IS_OBJECT_PICKED = msg.data
 
 
 
@@ -223,6 +227,9 @@ def main():
 
     # Subscribe to drone's local position
     rospy.Subscriber('mavros/local_position/pose', PoseStamped, cnt.posCb)
+
+    # Gripper state subscriber
+    rospy.Subscriber("/gripper_status", Bool, cnt.gripperCb)
 
     # Setpoint publisher
     sp_pub = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=1)
@@ -343,6 +350,9 @@ def main():
             rospy.loginfo("DROP state")
             # TODO: publish apropriate Joy msg to send drop signal
             joy_msg = Joy()
+            joy_msg.header.stamp = rospy.Time.now()
+            joy_msg.axes = [0.0, 0.0, 0.0, 0.0, 0.0, -1.0]
+            joy_msg.buttons = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             joy_pub.publish(joy_msg)
 
             if not cnt.IS_OBJECT_PICKED:
