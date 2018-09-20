@@ -13,7 +13,7 @@ def main():
         #(trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
 	try:
                 t1 = time.time()
-		(trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
+		(trans,rot) = listener.lookupTransform('/map', '/disc', rospy.Time(0))
                 t = time.time()-t1
                 print "duration(s):" , t
 		print "Translation: ", trans

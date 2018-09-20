@@ -283,7 +283,7 @@ def main():
 
             # TODO: find object in tf tree
             try:
-                (trans,rot) = listener.lookupTransform('/disc', '/map', rospy.Time(0))
+                (trans,rot) = listener.lookupTransform('/map', '/disc', rospy.Time(0))
                 cnt.IS_OBJECT_DETECTED = True
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 cnt.IS_OBJECT_DETECTED = False
