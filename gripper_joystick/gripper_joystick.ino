@@ -56,6 +56,7 @@ void setup(){
   pinMode(pushbutton,INPUT_PULLUP);  // initialize the pushbutton pin as an input
   nh.initNode();
   nh.subscribe(sub);
+  nh.advertise(button_pub);
 
   servo1.writeMicroseconds(1700); // pick
   servo2.writeMicroseconds(1700); // pick
@@ -65,7 +66,7 @@ void setup(){
 void loop(){
   buttonState = digitalRead(pushbutton);  // read the state of the pushbutton value
   nh.spinOnce();
-  delay(1);
+  delay(100);
   if (buttonState == LOW){                      // check if the pushbutton is not pressed.
     button_msg.data = true;
     nh.loginfo("Drop to pick-up again");
