@@ -65,8 +65,6 @@ void setup(){
  
 void loop(){
   buttonState = digitalRead(pushbutton);  // read the state of the pushbutton value
-  nh.spinOnce();
-  delay(100);
   if (buttonState == LOW){                      // check if the pushbutton is not pressed.
     button_msg.data = true;
     nh.loginfo("Drop to pick-up again");
@@ -76,5 +74,8 @@ void loop(){
   }
 
   button_pub.publish(&button_msg);
+  delay(10);
+  nh.spinOnce();
+  
   
 } 
