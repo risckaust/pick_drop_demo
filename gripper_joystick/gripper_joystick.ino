@@ -35,15 +35,14 @@ ros::Publisher button_pub("gripper_status", &button_msg);
 void MsgCb( const sensor_msgs::Joy& msg){
   if (msg.axes[5] < 0){
     nh.loginfo("Button 9 was clicked");
-    if (buttonState == LOW){                      // check if the pushbutton is not pressed.
-      nh.loginfo("Motors are moving to drop");
-      servo1.writeMicroseconds(1100); // drop
-      servo2.writeMicroseconds(1100); // drop
-      delay(5000);
-      servo1.writeMicroseconds(1700); // pick 
-      servo2.writeMicroseconds(1700); // pick
-      nh.loginfo("Ready to pick-up");
-    }/*if cond button*/
+    nh.loginfo("Motors are moving to drop");
+    servo1.writeMicroseconds(1700); // drop
+    servo2.writeMicroseconds(1700); // drop
+    delay(2000);
+    servo1.writeMicroseconds(1100); // pick 
+    servo2.writeMicroseconds(1100); // pick
+    nh.loginfo("Ready to pick-up");
+   
   }/*if cond leave*/
 }/*function*/
 
@@ -58,8 +57,8 @@ void setup(){
   nh.subscribe(sub);
   nh.advertise(button_pub);
 
-  servo1.writeMicroseconds(1700); // pick
-  servo2.writeMicroseconds(1700); // pick
+  servo1.writeMicroseconds(1100); // pick
+  servo2.writeMicroseconds(1100); // pick
   nh.loginfo("Ready to pick-up");
 } 
  
