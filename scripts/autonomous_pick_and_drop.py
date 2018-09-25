@@ -117,6 +117,7 @@ class Controller:
         # States
         self.TAKEOFF	= 0
         self.SEARCH		= 0
+        self.PRE_PICK   = 0
         self.PICK		= 0
         self.DROPPOINT	= 0
         self.DROP		= 0
@@ -151,9 +152,13 @@ class Controller:
         self.LAND_POINT_X = -0.46
         self.LAND_POINT_Y = -2.25
 
+        # Land state
+        self.IS_LANDED = False
+
     def resetStates(self):
     	self.TAKEOFF	= 0
         self.SEARCH		= 0
+        self.PRE_PICK   = 0
         self.PICK		= 0
         self.DROPPOINT	= 0
         self.DROP		= 0
@@ -170,6 +175,14 @@ class Controller:
 			return r
 
     # Callbacks
+
+    # Land state callback
+    def landStateCb(self, msg):
+        if msg is not None:
+            if msg.landed_state == 1:
+                self.IS_LANDED = True
+            else:
+                self.IS_LANDED = False
 
     ## local position callback
     def posCb(self, msg):
@@ -231,6 +244,9 @@ def main():
     # Gripper state subscriber
     rospy.Subscriber("/gripper_status", Bool, cnt.gripperCb)
 
+    # Get landing state
+    rospy.Subscriber("mavros/extended_state", ExtendedState, cnt.landStateCb)
+
     # Setpoint publisher
     sp_pub = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=1)
 
@@ -285,11 +301,11 @@ def main():
             try:
             	x,y = 0., 0.
             	for i in range(100):
-					(trans,rot) = listener.lookupTransform('/map', '/disc', rospy.Time(0))
-					x = x + trans[0]
-					y = y + trans[1]
-				trans[0] = x/100.
-				trans[1] = y/100.
+			(trans,rot) = listener.lookupTransform('/map', '/disc', rospy.Time(0))
+			x = x + trans[0]
+			y = y + trans[1]
+		trans[0] = x/100.
+		trans[1] = y/100.
                 cnt.IS_OBJECT_DETECTED = True
             except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
                 cnt.IS_OBJECT_DETECTED = False
@@ -300,7 +316,7 @@ def main():
             err = err**0.5
             if err < 0.05 and cnt.IS_OBJECT_DETECTED:
                 cnt.resetStates()
-                cnt.PICK = 1
+                cnt.PRE_PICK = 1
                 # start picking duration
                 pick_t = time.time()
 
@@ -311,12 +327,26 @@ def main():
 
 
 
+        if cnt.PRE_PICK:
+            rospy.loginfo("PRE-PICK state")
+
+            sp_x = trans[0] - 0.05
+            sp_y = trans[1] - 0.05
+
+            cnt.sp.position.x = sp_x
+            cnt.sp.position.y = sp_y
+
+            err = (cnt.local_pos.x - sp_x)**2 + (cnt.local_pos.y - sp_y)**2
+            err = err**0.5
+            if err < 0.05:
+                cnt.resetStates()
+                cnt.PICK = 1
 
         if cnt.PICK:
             rospy.loginfo("PICK state")
 
-            cnt.sp.position.x = trans[0] - 0.03
-            cnt.sp.position.y = trans[1] - 0.03
+            #cnt.sp.position.x = trans[0] - 0.05
+            #cnt.sp.position.y = trans[1] - 0.05
             cnt.sp.position.z = trans[2]
 
             # in case of re-pick
@@ -374,14 +404,18 @@ def main():
             err = (cnt.local_pos.x - cnt.LAND_POINT_X)**2 + (cnt.local_pos.y - cnt.LAND_POINT_Y)**2
             err = err**0.5
 
-            if err < 0.1:
+            if err < 0.2:
                 cnt.resetStates()
                 cnt.LAND = 1
 
         if cnt.LAND:
             rospy.loginfo("LAND state")
             cnt.modes.setAutoLandMode()
-            break
+            if cnt.IS_LANDED:
+                cnt.modes.setDisarm()
+                cnt.resetStates()
+                cnt.TAKEOFF = 1
+            #break
 
 
         sp_pub.publish(cnt.sp)
