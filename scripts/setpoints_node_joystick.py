@@ -88,7 +88,7 @@ class Controller:
 
         # We will fly at a fixed altitude for now
         # Altitude setpoint, [meters]
-        self.ALT_SP        = 1
+        self.ALT_SP        = 1.5
         # update the setpoint message with the required altitude
         self.sp.position.z    = self.ALT_SP
 
@@ -98,12 +98,12 @@ class Controller:
         self.joy_msg.axes=[0.0, 0.0, 0.0]
 
         # Step size for position update
-        self.STEP_SIZE = 2.0
+        self.STEP_SIZE = 1.5
 
         # Fence. We will assume a square fence for now
         self.FENCE_LIMIT_X = 2.0
         self.FENCE_LIMIT_Y = 3.0
-        self.FENCE_LIMIT_Z_DOWN = 0.25
+        self.FENCE_LIMIT_Z_DOWN = 0.15
         self.FENCE_LIMIT_Z_UP = self.ALT_SP
 
         # A Message for the current local position of the drone
@@ -172,7 +172,7 @@ class Controller:
 
         # limit
         self.sp.position.x = self.bound(xsp, -1.0*self.FENCE_LIMIT_X, self.FENCE_LIMIT_X)
-        self.sp.position.y = self.bound(ysp, -1.0*self.FENCE_LIMIT_Y, self.FENCE_LIMIT_Y)
+        self.sp.position.y = self.bound(ysp, 0.3, self.FENCE_LIMIT_Y)
         self.sp.position.z = self.bound(zsp, self.FENCE_LIMIT_Z_DOWN, self.FENCE_LIMIT_Z_UP)
 
 # Main function

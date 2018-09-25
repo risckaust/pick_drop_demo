@@ -3,13 +3,13 @@
 	<arg name="joy_dev" default="/dev/input/js0"/>
 	<arg name="fcu_url" default="/dev/ttyUSB0:921600" />
 	<arg name="gcs_url" default="udp://@192.168.0.105:14550" />
-	<arg name="tgt_system" default="1" />
+	<arg name="tgt_system" default="2" />
 	<arg name="tgt_component" default="1" />
 	<arg name="log_output" default="screen" />
 
 	<arg name="mocap_server" default="192.168.0.101" />
 
-	<arg name="rbname" default="Asmaa" />
+	<arg name="rbname" default="manual" />
 
 	<include file="$(find mavros)/launch/node.launch">
 		<arg name="pluginlists_yaml" value="$(find mavros)/launch/px4_pluginlists.yaml" />
