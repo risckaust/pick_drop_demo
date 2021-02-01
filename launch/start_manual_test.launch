@@ -27,7 +27,7 @@
 	</include>
 
 	<node pkg="topic_tools" type="relay" name="mocap_topic_relay" args="/vrpn_client_node/$(arg rbname)/pose /mavros/vision_pose/pose" />
-	<node pkg="rosserial_python" name="arduino_gripper_node" type="serial_node.py" args="/dev/ttyUSB1" />
+	<!-- <node pkg="rosserial_python" name="arduino_gripper_node" type="serial_node.py" args="/dev/ttyUSB1" /> -->
 
 	<node pkg="joy" type="joy_node" name="joy_node"  required="true" output="screen">
 		      <param name="dev" type="string" value="$(arg joy_dev)" />
