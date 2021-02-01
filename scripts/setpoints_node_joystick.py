@@ -115,20 +115,6 @@ class Controller:
         self.act = ActuatorControl()
         self.mount = MountControl()
 
-    act.header.stamp = rospy.get_rostime()
-    act.header.frame_id = ""
-    act.group_mix = 2
-    act.controls[1] = 15/3.14
-    act.controls[2] = 15/3.14
-
-    mount.header.stamp = rospy.get_rostime()
-    mount.header.frame_id = ""
-    mount.mode = 2
-    mount.pitch = 15/3.14 * 180
-    mount.roll = 15/3.14 * 180
-    mount.yaw = 15/3.14 * 180
-
-
     def bound(self, v, low, up):
 			r = v
 			if v > up:
@@ -171,7 +157,22 @@ class Controller:
 		# If button 'B' on joystick is pressed
 		if msg.buttons[2] > 0:
 			self.modes.setDisarm()
-#		if msg.buttons[] > 0:
+
+        if msg.buttons[3] > 0:
+            self.drop = True
+            self.act.header.stamp = rospy.get_rostime()
+            self.act.header.frame_id = ""
+            self.act.group_mix = 2
+            self.act.controls[1] = 15/3.14
+            self.act.controls[2] = 15/3.14
+
+            self.mount.header.stamp = rospy.get_rostime()
+            self.mount.header.frame_id = ""
+            self.mount.mode = 2
+            self.mount.pitch = 15/3.14 * 180
+            self.mount.roll = 15/3.14 * 180
+            self.mount.yaw = 15/3.14 * 180
+
 
     ## Update setpoint message
     def updateSp(self):
@@ -181,7 +182,7 @@ class Controller:
         x = 1.0*self.joy_msg.axes[3]
         y = 1.0*self.joy_msg.axes[2]
         z = self.joy_msg.axes[1]
-      
+
         #self.sp.position.x = self.local_pos.x + self.STEP_SIZE*x
         #self.sp.position.y = self.local_pos.y + self.STEP_SIZE*y
 
@@ -199,14 +200,11 @@ def main():
 
     # initiate node
     rospy.init_node('setpoint_node', anonymous=True)
- 
+
     # flight mode object
     modes = fcuModes()
     # controller object
     cnt = Controller()
-
-    #act = ActuatorControl()
-    #mount = MountControl()
 
     # ROS loop rate, [Hz]
     rate = rospy.Rate(20.0)
@@ -221,28 +219,11 @@ def main():
 
     # Setpoint publisher
     sp_pub = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=1)
+
+
     actuator_setpoint_pub = rospy.Publisher('mavros/actuator_control', ActuatorControl, queue_size=1)
     mount_control_pub = rospy.Publisher('mavros/mount_control/command', MountControl, queue_size=1)
-    # Gripper publishers
-    #act.header.stamp = rospy.get_rostime()
-    #act.header.frame_id = ""
-    #act.group_mix = 2
-    #act.controls[1] = 15/3.14
-    #act.controls[2] = 15/3.14
 
-    #mount.header.stamp = rospy.get_rostime()
-    #mount.header.frame_id = ""
-    #mount.mode = 2
-    #mount.pitch = 15/3.14 * 180
-    #mount.roll = 15/3.14 * 180
-    #mount.yaw = 15/3.14 * 180
-
-
-
-	# Make sure the drone is armed
-	#while not cnt.state.armed:
-	#	modes.setArm()
-	#	rate.sleep()
 
     # We need to send few setpoint messages, then activate OFFBOARD mode, to take effect
     k=0
@@ -251,16 +232,15 @@ def main():
         rate.sleep()
         k = k+1
 
-    # activate OFFBOARD mode
-    #modes.setOffboardMode()
-
     # ROS main loop
     while not rospy.is_shutdown():
         cnt.updateSp()
         sp_pub.publish(cnt.sp)
-        actuator_setpoint_pub.publish(act)
-        mount_control_pub.publish(mount)
-	
+        if cnt.drop:
+            actuator_setpoint_pub.publish(cnt.act)
+            mount_control_pub.publish(cnt.mount)
+            cnt.drop = False
+
         rate.sleep()
 
 
